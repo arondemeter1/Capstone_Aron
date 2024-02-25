@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Detail</title>
+</head>
+<body>
+    <h1>{{ company_name }}</h1>
+    <p>Current Price: {{ current_price }}€</p>
+    <h2>Historical Prices:</h2>
+    <ul>
+        {% for data in historical_prices %}
+        <li>Date: {{ data.date }}, Price: {{ data.close }}€</li>
+        {% endfor %}
+    </ul>    
+    <a href="/">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio Overview</title>
+</head>
+<body>
+    <h1>Total Investment: {{ total_value }}€</h1>
+    {% for symbol, data in portfolio_data.items() %}
+    <div>
+        <h2>{{ data.company_name }} ({{ symbol }})</h2>
+        <p>% of Portfolio: {{ data.percent_of_portfolio }}%</p>
+        <p>Value: {{ data.value }}€</p>
+        <a href="/stock/{{ symbol }}">View Details</a>
+    </div>
+    {% endfor %}
+</body>
+</html>
