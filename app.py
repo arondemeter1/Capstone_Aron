@@ -4,10 +4,14 @@ import requests
 from datetime import datetime, timedelta
 import time
 import math
+from flask import Flask, jsonify
+from flask_cors import CORS, cross_origin
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+CORS(app)
 
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
