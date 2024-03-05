@@ -8,6 +8,7 @@ function StockDetail() {
   const [stockData, setStockData] = useState(null);
 
   useEffect(() => {
+    // Replace 'YOUR_FLASK_SERVER_URL' with the actual base URL of your Flask server
     const fetchStockData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/stock/${symbol}`);
@@ -26,7 +27,7 @@ function StockDetail() {
       {stockData ? (
         <>
           <h2>{stockData.company_name} - {symbol}</h2>
-          {}
+          {/* add chart and additional details here using stockData */}
         </>
       ) : (
         <p>Loading...</p> //provides a loading state or error message

@@ -2,33 +2,37 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-function PortfolioOverview({ onStockSelect }) {
-  //initialize state to match expected structure of the Flask response
-  const [portfolioData, setPortfolioData] = useState({ portfolio_performance: {} });
+function PortfolioOverview() {
+  const [portfolioData, setPortfolioData] = useState(null);
 
   useEffect(() => {
-    //fetch data from Flask API
-    axios.get('http://localhost:5000/') 
+    axios.get('http://localhost:5000/') // i will change this at deployment
       .then(response => {
-        console.log('Fetched data:', response.data); //log the fetched data
-        setPortfolioData(response.data.portfolio_performance); //set the state
+        setPortfolioData(response.data);
       })
       .catch(error => console.error('Error fetching portfolio data', error));
   }, []);
 
-  //log the state right before rendering
-  console.log('Portfolio Data at render:', portfolioData);
+  if (!portfolioData) {
+    return <div>Loading portfolio data...</div>;
+  }
 
   return (
     <div>
       <h1>My Stock Portfolio</h1>
-      {Object.entries(portfolioData).map(([symbol, stock]) => (
-        <div key={symbol}>
-          <Link to={`/stock/${symbol}`} onClick={() => onStockSelect(stock)}>
-            {stock.company_name} ({symbol})
-          </Link>
-        </div>
-      ))}
+      <h2>Total Investment: ${portfolioData.total_portfolio_value.toFixed(2)}</h2>
+      <h3>Total ROI: {portfolioData.portfolio_ROI.toFixed(2)}%</h3>
+
+      <div>
+        {Object.entries(portfolioData.portfolio_performance).map(([symbol, stock]) => (
+          <div key={symbol}>
+            <h4>{stock.company_name} ({symbol})</h4>
+            <p>Value: ${stock.current_value.toFixed(2)}</p>
+            <p>Percent of Portfolio: {stock.percent_of_portfolio.toFixed(2)}%</p>
+            <Link to={`/stock/${symbol}`}>View Details</Link>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
