@@ -1,54 +1,125 @@
-from flask import Flask, render_template, jsonify
+import logging
+from flask import Flask, jsonify
 import requests
+from datetime import datetime, timedelta
+import time
+import math
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 
-ALPHA_VANTAGE_API_KEY = ''
+ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
 
+#historical_price = the price at which the stock was purchased
 portfolio_data = {
-    "AAPL": {"company_name": "Apple Inc.", "percent_of_portfolio": 20, "value": 20000},
-    "AMZN": {"company_name": "Amazon.com, Inc.", "percent_of_portfolio": 20, "value": 20000},
-    "NFLX": {"company_name": "Netflix, Inc.", "percent_of_portfolio": 20, "value": 20000},
-    "GOOGL": {"company_name": "Alphabet Inc.", "percent_of_portfolio": 20, "value": 20000},
-    "NVDA": {"company_name": "NVIDIA Corporation", "percent_of_portfolio": 20, "value": 20000},
+    "AAPL": {"company_name": "Apple Inc.", "shares": 10, "historical_price": 174.46},  
+    "AMZN": {"company_name": "Amazon.com, Inc.", "shares": 5, "historical_price": 125.96},  
+    "NVDA": {"company_name": "NVIDIA Corporation", "shares": 8, "historical_price": 446.84},  
 }
+
+def fetch_price(symbol):
+    """Fetches the most recent price for a given symbol."""
+    params = {
+        'function': 'GLOBAL_QUOTE',
+        'symbol': symbol,
+        'apikey': ALPHA_VANTAGE_API_KEY,
+    }
+    response = requests.get(ALPHA_VANTAGE_BASE_URL, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        price_info = data.get("Global Quote", {})
+        logging.info(f"Successfully fetched price for {symbol}: {price_info.get('05. price', 'N/A')}")
+        return float(price_info.get("05. price", 0))
+    else:
+        logging.error(f"Error fetching recent data for {symbol}: HTTP {response.status_code}, Response: {response.text}")
+    return None
+
+
+def fetch_monthly_prices(symbol):
+    """Fetches monthly closing prices for the last 12 months for a given stock symbol."""
+    params = {
+        'function': 'TIME_SERIES_MONTHLY',
+        'symbol': symbol,
+        'apikey': ALPHA_VANTAGE_API_KEY
+    }
+    response = requests.get(ALPHA_VANTAGE_BASE_URL, params=params)
+    if response.ok:
+        data = response.json()
+        time_series = data.get('Monthly Time Series', {})
+        monthly_prices = [{ "date": date, "close": info['4. close'] } for date, info in sorted(time_series.items(), reverse=True)[:12]]
+        return monthly_prices
+    return []
 
 @app.route('/')
 def index():
-    total_value = sum(stock['value'] for stock in portfolio_data.values())
-    return render_template('index.html', portfolio_data=portfolio_data, total_value=total_value)
+    total_current_value = 0
+    total_initial_value = 0  
+    portfolio_performance = {}
 
+    for symbol, data in portfolio_data.items():
+        current_price = fetch_price(symbol)
+        if current_price is not None:
+            shares_owned = data['shares']
+            historical_price = data.get("historical_price")  #use hardcoded purchase price
+            current_value = current_price * shares_owned
+            initial_value = historical_price * shares_owned
+
+            total_current_value += current_value
+            total_initial_value += initial_value  
+
+            roi = ((current_value - initial_value) / initial_value) * 100
+
+            portfolio_performance[symbol] = {
+                "company_name": data['company_name'],
+                "current_price": current_price,
+                "shares_owned": shares_owned,
+                "initial_value": initial_value,
+                "current_value": current_value,
+                "roi": roi,
+            }
+
+    #calculates the percentage of the portfolio for each stock
+    for symbol, perf in portfolio_performance.items():
+        perf["percent_of_portfolio"] = (perf["current_value"] / total_current_value) * 100 if total_current_value else 0
+
+    #calculates the overall portfolio ROI
+    total_roi = ((total_current_value - total_initial_value) / total_initial_value) * 100 if total_initial_value else 0
+
+    return jsonify({
+        "total_portfolio_value": total_current_value,
+        "portfolio_performance": portfolio_performance,
+        "portfolio_ROI": total_roi  
+    })
+
+ 
 @app.route('/stock/<symbol>')
 def stock_detail(symbol):
     if symbol not in portfolio_data:
-        return "Stock not found in portfolio", 404
+        return jsonify({"error": "Stock not found in portfolio"}), 404
 
-    #fetch current price using GLOBAL_QUOTE
-    current_price_response = requests.get(f"{ALPHA_VANTAGE_BASE_URL}function=GLOBAL_QUOTE&symbol={symbol}&apikey={ALPHA_VANTAGE_API_KEY}")
-    #fetch the last 12 months with TIME_SERIES_MONTHLY
-    historical_data_response = requests.get(f"{ALPHA_VANTAGE_BASE_URL}function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey={ALPHA_VANTAGE_API_KEY}")
+    current_price = fetch_price(symbol)
+    if current_price is None:
+        return jsonify({"message": "Investment values are currently updating"}), 503
 
-    if current_price_response.ok and historical_data_response.ok:
-        current_price_data = current_price_response.json()
-        historical_data = historical_data_response.json()
+    data = portfolio_data[symbol]
+    shares_owned = data['shares']
+    historical_price = data.get("historical_price")
+    current_value = shares_owned * current_price
+    initial_value = shares_owned * historical_price
+    roi = ((current_value - initial_value) / initial_value) * 100
 
-        current_price = current_price_data.get("Global Quote", {}).get("05. price", "N/A")
- 
-        monthly_data = historical_data.get("Monthly Time Series", {})
-        historical_prices = [
-            {"date": date, "close": values["4. close"]}
-            for date, values in sorted(monthly_data.items(), reverse=True)[:12]
-        ]
+    monthly_prices = fetch_monthly_prices(symbol)
 
-        return render_template('stock_detail.html',
-                               company_name=portfolio_data[symbol]['company_name'],
-                               symbol=symbol,
-                               current_price=current_price,
-                               historical_prices=historical_prices)
-    else:
-        return "Error fetching data from Alpha Vantage", 500
-
+    return jsonify({
+        "company_name": data['company_name'],
+        "total_value_owned": current_value,
+        "current_price": current_price,
+        "historical_price": historical_price,
+        "roi": roi,
+        "monthly_prices": monthly_prices
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
