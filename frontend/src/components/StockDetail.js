@@ -68,7 +68,6 @@ function StockDetail() {
       <p>Current Price: ${current_price.toFixed(2)}</p>
       <p>ROI: {roi.toFixed(2)}%</p>
       
-      {/* Render the chart with monthly closing prices */}
       <Line data={chartData} options={chartOptions} />
 
       {}
