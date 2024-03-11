@@ -6,7 +6,7 @@ function PortfolioOverview() {
   const [portfolioData, setPortfolioData] = useState(null);
 
   useEffect(() => {
-    axios.get('https://mcsbt-integration-arondemeter.ey.r.appspot.com/') // i will change this at deployment
+    axios.get('http://localhost:5000') // i will change this at deployment
       .then(response => {
         setPortfolioData(response.data);
       })

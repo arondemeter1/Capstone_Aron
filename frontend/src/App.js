@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
 import PortfolioOverview from './components/PortfolioOverview';
 import StockDetail from './components/StockDetail';
-import { HashRouter as Router, Route, Routes } from 'react-router-dom'; // i should have hash router instead of browser router
+import Login from './components/Login';
+import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 
 function App() {
   const [selectedStock, setSelectedStock] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    setAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+  };
 
   return (
     <Router>
       <Routes>
-        <Route exact path="/" element={<PortfolioOverview onStockSelect={setSelectedStock} />} />
-        <Route path="/stock/:symbol" element={<StockDetail stock={selectedStock} />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/" element={authenticated ? <PortfolioOverview onStockSelect={setSelectedStock} /> : <Navigate replace to="/login" />} />
+        <Route path="/stock/:symbol" element={authenticated ? <StockDetail stock={selectedStock} /> : <Navigate replace to="/login" />} />
       </Routes>
     </Router>
   );

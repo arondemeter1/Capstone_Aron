@@ -1,6 +1,7 @@
 import logging
-from flask import Flask, jsonify
 import requests
+from flask import Flask, request, session, redirect, url_for, jsonify
+import hashlib
 from datetime import datetime, timedelta
 import time
 import math
@@ -11,7 +12,17 @@ from flask_cors import CORS, cross_origin
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
+app.secret_key = '83h9137JXHUENRyxyx(=:dfclL:)'
+
+def hash_value(password):
+    return hashlib.sha1(password.encode()).hexdigest()
+
+users_database = {
+    'arondemeter': hash_value('happy')
+}
+
+
 
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
@@ -124,6 +135,22 @@ def stock_detail(symbol):
         "roi": roi,
         "monthly_prices": monthly_prices
     })
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data['username']
+    password = data['password']
+    hashed_password = hash_value(password)
+    
+    if username in users_database and users_database[username] == hashed_password:
+        session['username'] = username
+        return jsonify({'status': 'success'}), 200
+    else:
+        return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
+    
+
 
 if __name__ == '__main__':
     app.run(debug=False)
