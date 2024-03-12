@@ -7,6 +7,7 @@ import time
 import math
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
+import oracledb
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,6 +23,13 @@ users_database = {
     'arondemeter': hash_value('happy')
 }
 
+#oracle database credentials
+un = 'Admin'
+pw = 'Capstonemcsbt2024'
+dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
+
+#creating a connection pool for the oracle database
+pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
 
 
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
