@@ -13,14 +13,7 @@ function PortfolioOverview() {
       .catch(error => console.error('Error fetching portfolio data', error));
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post('http://localhost:5000/logout'); // i will change this at deployment
-      window.location.href = '/login'; // redirect to login page
-    } catch (error) {
-      console.error('Error logging out', error);
-    }
-  };
+
 
   if (!portfolioData) {
     return <div>Loading portfolio data...</div>;
@@ -42,8 +35,6 @@ function PortfolioOverview() {
           </div>
         ))}
       </div>
-
-      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
