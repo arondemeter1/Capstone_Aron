@@ -19,7 +19,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} onLogout={handleLogout} />} />
         <Route path="/" element={authenticated ? <PortfolioOverview onStockSelect={setSelectedStock} /> : <Navigate replace to="/login" />} />
         <Route path="/stock/:symbol" element={authenticated ? <StockDetail stock={selectedStock} /> : <Navigate replace to="/login" />} />
       </Routes>

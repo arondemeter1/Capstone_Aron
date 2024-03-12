@@ -150,7 +150,10 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
     
-
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('username', None)  #remove the user from the session
+    return jsonify({'message': 'Logged out successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=False)
