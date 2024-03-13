@@ -24,7 +24,7 @@ users_database = {
 }
 
 #oracle database credentials
-un = 'Admin'
+un = 'ADMIN'
 pw = 'Capstonemcsbt2024'
 dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
 
@@ -162,6 +162,7 @@ def login():
 def logout():
     session.pop('username', None)  #remove the user from the session
     return jsonify({'message': 'Logged out successfully'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=False)
