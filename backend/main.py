@@ -122,7 +122,6 @@ def index():
             historical_price = stock.PURCHASE_PRICE
             current_value = current_price * shares_owned
             initial_value = historical_price * shares_owned
-
             total_current_value += current_value
             total_initial_value += initial_value
 
@@ -152,12 +151,13 @@ def index():
 
 def fetch_company_name(symbol):
     """Fetches the company name for a given stock symbol."""
-    search_response = requests.get(f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHA_VANTAGE_API_KEY}")
+    search_response = requests.get(
+        f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHA_VANTAGE_API_KEY}")
     if search_response.status_code == 200:
         search_data = search_response.json()
         company_name = search_data.get('bestMatches', [{}])[0].get('2. name', 'Unknown')
-        return company_name
-    return None
+        return company_name, None  # Return a tuple with two elements
+    return None, None  # Return a tuple with two elements
 
 
  
