@@ -204,25 +204,38 @@ def logout():
 @app.route('/portfolio/add', methods=['POST'])
 def add_stock():
     data = request.json
-    user_id = '1'
-    symbol = data['symbol'].upper()
-    shares = int(data['shares'])
-    purchase_price = float(data['purchase_price'])
+    logging.info(f"Received data for adding stock: {data}")
 
-    #check if the stock already exists in the user's portfolio
-    existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
+    try:
+        user_id = '1'
+        symbol = data['symbol'].upper()
+        shares = int(data['shares'])
+        purchase_price = float(data['purchase_price'])
+    except (KeyError, TypeError, ValueError) as e:
+        logging.error(f"Error parsing stock data: {e}")
+        return jsonify({'status': 'fail', 'message': f"Error parsing stock data: {e}"}), 400
 
-    if existing_stock:
-        #update the number of shares if the stock is already in the portfolio
-        existing_stock.SHARES += shares
-    else:
-        #add a new stock entry to the portfolio
-        new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
-        db.session.add(new_stock)
+    try:
+        # check if the stock already exists in the user's portfolio
+        existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
 
-    db.session.commit()
+        if existing_stock:
+            # update the number of shares if the stock is already in the portfolio
+            existing_stock.SHARES += shares
+            logging.info(f"Updated existing stock {symbol}, new share count: {existing_stock.SHARES}")
+        else:
+            # add a new stock entry to the portfolio
+            new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
+            db.session.add(new_stock)
+            logging.info(f"Added new stock {symbol} to the portfolio")
+
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating database: {e}")
+        return jsonify({'status': 'fail', 'message': f"Error updating database: {e}"}), 500
+
     return jsonify({'status': 'success', 'message': 'Stock added to portfolio'}), 200
-
 
 #REMOVING STOCK
 @app.route('/portfolio/remove', methods=['POST'])

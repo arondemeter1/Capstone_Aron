@@ -16,13 +16,25 @@ function PortfolioOverview() {
   }, []);
 
   const onModifyStock = (data, isAdding) => {
+    // Construct endpoint and validate form data
     const endpoint = isAdding ? '/portfolio/add' : '/portfolio/remove';
+    const symbol = data.symbol;
+    const shares = parseInt(data.shares);
+    const purchase_price = parseFloat(data.purchase_price);
+
+    // Validate the form data
+    if (!symbol || isNaN(shares) || isNaN(purchase_price)) {
+      console.error('Form data is invalid:', data);
+      return; // Do not proceed with the API call
+    }
+
     const stockData = {
-      action: isAdding ? 'add' : 'remove',
-      symbol: data.symbol,
-      shares: parseInt(data.shares),
-      purchase_price: parseFloat(data.purchase_price),
+      symbol: symbol,
+      shares: shares,
+      purchase_price: purchase_price,
     };
+
+    console.log('Form data before sending:', stockData); // Log the validated and structured data
 
     axios.post(`http://localhost:5000${endpoint}`, stockData)
       .then(response => {
@@ -54,7 +66,6 @@ function PortfolioOverview() {
           </div>
         ))}
       </div>
-
       <div className="portfolio-modify">
         {/* Form for adding stocks */}
         <form onSubmit={handleSubmit(data => onModifyStock(data, true))} style={{ marginBottom: '1rem' }}>
@@ -63,7 +74,6 @@ function PortfolioOverview() {
           <input {...register('purchase_price')} placeholder="Purchase Price" type="number" step="0.01" required />
           <button type="submit">Add Stock</button>
         </form>
-
         {/* Form for removing stocks */}
         <form onSubmit={handleSubmit(data => onModifyStock(data, false))}>
           <input {...register('symbol')} placeholder="Ticker Symbol" required />
