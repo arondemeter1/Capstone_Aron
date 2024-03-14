@@ -164,7 +164,7 @@ def fetch_company_name(symbol):
 @app.route('/stock/<symbol>')
 def stock_detail(symbol):
     # Query the stock information from the database
-    stock = Stock.query.filter_by(symbol=symbol).first()
+    stock = Stock.query.filter_by(SYMBOL=symbol).first()
     
     if stock is None:
         return jsonify({"error": "Stock not found in portfolio"}), 404
