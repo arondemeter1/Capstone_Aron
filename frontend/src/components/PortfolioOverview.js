@@ -15,10 +15,16 @@ function PortfolioOverview() {
       .catch(error => console.error('Error fetching portfolio data', error));
   }, []);
 
-  const onModifyStock = (data) => {
-    const isAdding = data.action === 'add'; // Determine if we are adding or removing based on the radio button value
+  const onModifyStock = (data, isAdding) => {
     const endpoint = isAdding ? '/portfolio/add' : '/portfolio/remove';
-    axios.post(`http://localhost:5000${endpoint}`, data)
+    const stockData = {
+      action: isAdding ? 'add' : 'remove',
+      symbol: data.symbol,
+      shares: parseInt(data.shares),
+      purchase_price: parseFloat(data.purchase_price),
+    };
+
+    axios.post(`http://localhost:5000${endpoint}`, stockData)
       .then(response => {
         setPortfolioData(response.data); // Update state with the new portfolio data
         reset(); // reset the form fields after submission

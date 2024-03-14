@@ -47,10 +47,6 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# Initialize SQLAlchemy with the current Flask app
-#db.init_app(app)
-
-#define a simple password hashing function
 def hash_value(password):
     return hashlib.sha1(password.encode()).hexdigest()
 
@@ -59,7 +55,6 @@ ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
 
 
-#added it back as with the oracle db it is not working
 users_database = {
     'arondemeter': hash_value('happy')
 }
@@ -130,11 +125,11 @@ def index():
                 "roi": roi,
             }
 
-    # Calculates the percentage of the portfolio for each stock
+    #calculates the percentage of the portfolio for each stock
     for symbol, perf in portfolio_performance.items():
         perf["percent_of_portfolio"] = (perf["current_value"] / total_current_value) * 100 if total_current_value else 0
 
-    # Calculates the overall portfolio ROI
+    #calculates the overall portfolio ROI
     total_roi = ((total_current_value - total_initial_value) / total_initial_value) * 100 if total_initial_value else 0
 
     return jsonify({
@@ -150,14 +145,14 @@ def fetch_company_name(symbol):
     if search_response.status_code == 200:
         search_data = search_response.json()
         company_name = search_data.get('bestMatches', [{}])[0].get('2. name', 'Unknown')
-        return company_name, None  # Return a tuple with two elements
-    return None, None  # Return a tuple with two elements
+        return company_name, None  #return a tuple with two elements
+    return None, None  #return a tuple with two elements
 
 
  
 @app.route('/stock/<symbol>')
 def stock_detail(symbol):
-    # Query the stock information from the database
+    #query the stock information from the database
     stock = Stock.query.filter_by(SYMBOL=symbol).first()
     
     if stock is None:
@@ -167,10 +162,9 @@ def stock_detail(symbol):
     if current_price is None:
         return jsonify({"message": "Investment values are currently updating"}), 503
     
-    # Assuming the company name needs to be fetched dynamically as the model doesn't contain it
     company_name, _ = fetch_company_name(symbol)
     
-    # Use database information instead of hardcoded data
+    #uses database information instead of hardcoded data
     shares_owned = stock.SHARES
     historical_price = stock.PURCHASE_PRICE
     current_value = shares_owned * current_price
@@ -180,35 +174,13 @@ def stock_detail(symbol):
     monthly_prices = fetch_monthly_prices(symbol)
 
     return jsonify({
-        "company_name": company_name,  # Fetched dynamically
+        "company_name": company_name,  #fetched dynamically
         "total_value_owned": current_value,
         "current_price": current_price,
         "historical_price": historical_price,
         "roi": roi,
         "monthly_prices": monthly_prices
     })
-
-
-#as the oracle db version is somewhy not working
-#@app.route('/login', methods=['POST'])
-#def login():
-    #data = request.json
-    #username = data.get('username')  # The name entered by the user in the frontend.
-    #password = data.get('password')
-
-    # Hash the provided password
-    #hashed_password = hashlib.sha1(password.encode()).hexdigest()
-    
-    # Query the database for the user with the given name
-    #user = User.query.filter_by(name=username).first()
-    
-    #if user and user.hashed_password == hashed_password:
-        # The passwords match
-        #session['username'] = username
-        #return jsonify({'status': 'success'}), 200
-    #else:
-        # The user does not exist or password does not match
-        #return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -225,7 +197,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.pop('username', None)  #remove the user from the session
+    session.pop('username', None) #remove the user from the session
     return jsonify({'message': 'Logged out successfully'}), 200
 
 #ADDING STOCK
@@ -236,18 +208,18 @@ def add_stock():
     symbol = data['symbol'].upper()
     shares = int(data['shares'])
     purchase_price = float(data['purchase_price'])
-    
-    # Check if the stock already exists in the user's portfolio
+
+    #check if the stock already exists in the user's portfolio
     existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
-    
+
     if existing_stock:
-        # Update the number of shares if the stock is already in the portfolio
+        #update the number of shares if the stock is already in the portfolio
         existing_stock.SHARES += shares
     else:
-        # Add a new stock entry to the portfolio
+        #add a new stock entry to the portfolio
         new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
         db.session.add(new_stock)
-    
+
     db.session.commit()
     return jsonify({'status': 'success', 'message': 'Stock added to portfolio'}), 200
 
@@ -257,20 +229,20 @@ def add_stock():
 def remove_stock():
     data = request.json
     user_id = '1'
-    symbol = data['symbol'].upper()  # Ensure symbol is uppercase
-    shares_to_remove = int(data['shares'])#THIS NEEDS TO BE FIXED
+    symbol = data['symbol'].upper()  #ensure symbol is uppercase
+    shares_to_remove = int(data['shares'])  #get the number of shares to remove from the data object
 
-    # Retrieve the user's stock entry
+    #retrieve the user's stock entry
     stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
 
     if not stock:
         return jsonify({'status': 'fail', 'message': 'Stock not found in portfolio'}), 404
 
-    # Check if user has enough shares to remove
+    #check if user has enough shares to remove
     if stock.SHARES < shares_to_remove:
         return jsonify({'status': 'fail', 'message': 'Not enough shares to remove'}), 400
 
-    # Update the shares count or delete the stock entry if shares_to_remove equals the current share count
+    #update the shares count or delete the stock entry if shares_to_remove equals the current share count
     if stock.SHARES > shares_to_remove:
         stock.SHARES -= shares_to_remove
         db.session.commit()
