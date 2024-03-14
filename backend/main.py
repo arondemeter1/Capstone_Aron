@@ -8,38 +8,53 @@ import math
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 import oracledb
+from models import Stock
+from models import User
+from models import db
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.pool import NullPool
 
-
+#configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+#initialize the Flask app and CORS
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.secret_key = '83h9137JXHUENRyxyx(=:dfclL:)'
 
+#update the SQLALCHEMY_DATABASE_URI to use oracle+oracledb dialect
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'oracle+oracledb://ADMIN:Capstonemcsbt2024@'
+    'adb.eu-madrid-1.oraclecloud.com:1522/'
+    'g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com?ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US"'
+)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+#define a simple password hashing function
 def hash_value(password):
     return hashlib.sha1(password.encode()).hexdigest()
-
-users_database = {
-    'arondemeter': hash_value('happy')
-}
 
 #oracle database credentials
 un = 'ADMIN'
 pw = 'Capstonemcsbt2024'
-dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
+dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))'''
 
-#creating a connection pool for the oracle database
+#create a connection pool for the Oracle database using oracledb
 pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
-
-
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
 
 #historical_price = the price at which the stock was purchased
-portfolio_data = {
-    "AAPL": {"company_name": "Apple Inc.", "shares": 10, "historical_price": 174.46},  
-    "AMZN": {"company_name": "Amazon.com, Inc.", "shares": 5, "historical_price": 125.96},  
-    "NVDA": {"company_name": "NVIDIA Corporation", "shares": 8, "historical_price": 446.84},  
+#portfolio_data = {
+#    "AAPL": {"company_name": "Apple Inc.", "shares": 10, "historical_price": 174.46},  
+#    "AMZN": {"company_name": "Amazon.com, Inc.", "shares": 5, "historical_price": 125.96},  
+#    "NVDA": {"company_name": "NVIDIA Corporation", "shares": 8, "historical_price": 446.84},  
+#}
+
+#added it back as with the oracle db it is not working
+users_database = {
+    'arondemeter': hash_value('happy')
 }
 
 def fetch_price(symbol):
@@ -78,24 +93,30 @@ def fetch_monthly_prices(symbol):
 @app.route('/')
 def index():
     total_current_value = 0
-    total_initial_value = 0  
+    total_initial_value = 0
     portfolio_performance = {}
 
-    for symbol, data in portfolio_data.items():
+    stocks = Stock.query.all()
+    
+    for stock in stocks:
+        symbol = stock.symbol
         current_price = fetch_price(symbol)
-        if current_price is not None:
-            shares_owned = data['shares']
-            historical_price = data.get("historical_price")  #use hardcoded purchase price
+        
+        company_name, _ = fetch_company_name(symbol)
+
+        if current_price is not None and company_name is not None:
+            shares_owned = stock.shares
+            historical_price = stock.purchase_price
             current_value = current_price * shares_owned
             initial_value = historical_price * shares_owned
 
             total_current_value += current_value
-            total_initial_value += initial_value  
+            total_initial_value += initial_value
 
             roi = ((current_value - initial_value) / initial_value) * 100
 
             portfolio_performance[symbol] = {
-                "company_name": data['company_name'],
+                "company_name": company_name,
                 "current_price": current_price,
                 "shares_owned": shares_owned,
                 "initial_value": initial_value,
@@ -103,11 +124,11 @@ def index():
                 "roi": roi,
             }
 
-    #calculates the percentage of the portfolio for each stock
+    # Calculates the percentage of the portfolio for each stock
     for symbol, perf in portfolio_performance.items():
         perf["percent_of_portfolio"] = (perf["current_value"] / total_current_value) * 100 if total_current_value else 0
 
-    #calculates the overall portfolio ROI
+    # Calculates the overall portfolio ROI
     total_roi = ((total_current_value - total_initial_value) / total_initial_value) * 100 if total_initial_value else 0
 
     return jsonify({
@@ -116,19 +137,35 @@ def index():
         "portfolio_ROI": total_roi  
     })
 
+def fetch_company_name(symbol):
+    """Fetches the company name for a given stock symbol."""
+    search_response = requests.get(f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey={ALPHA_VANTAGE_API_KEY}")
+    if search_response.status_code == 200:
+        search_data = search_response.json()
+        company_name = search_data.get('bestMatches', [{}])[0].get('2. name', 'Unknown')
+        return company_name
+    return None
+
+
  
 @app.route('/stock/<symbol>')
 def stock_detail(symbol):
-    if symbol not in portfolio_data:
+    # Query the stock information from the database
+    stock = Stock.query.filter_by(symbol=symbol).first()
+    
+    if stock is None:
         return jsonify({"error": "Stock not found in portfolio"}), 404
 
     current_price = fetch_price(symbol)
     if current_price is None:
         return jsonify({"message": "Investment values are currently updating"}), 503
-
-    data = portfolio_data[symbol]
-    shares_owned = data['shares']
-    historical_price = data.get("historical_price")
+    
+    # Assuming the company name needs to be fetched dynamically as the model doesn't contain it
+    company_name, _ = fetch_company_name(symbol)
+    
+    # Use database information instead of hardcoded data
+    shares_owned = stock.shares
+    historical_price = stock.purchase_price
     current_value = shares_owned * current_price
     initial_value = shares_owned * historical_price
     roi = ((current_value - initial_value) / initial_value) * 100
@@ -136,7 +173,7 @@ def stock_detail(symbol):
     monthly_prices = fetch_monthly_prices(symbol)
 
     return jsonify({
-        "company_name": data['company_name'],
+        "company_name": company_name,  # Fetched dynamically
         "total_value_owned": current_value,
         "current_price": current_price,
         "historical_price": historical_price,
@@ -144,6 +181,27 @@ def stock_detail(symbol):
         "monthly_prices": monthly_prices
     })
 
+
+#as the oracle db version is somewhy not working
+#@app.route('/login', methods=['POST'])
+#def login():
+    #data = request.json
+    #username = data.get('username')  # The name entered by the user in the frontend.
+    #password = data.get('password')
+
+    # Hash the provided password
+    #hashed_password = hashlib.sha1(password.encode()).hexdigest()
+    
+    # Query the database for the user with the given name
+    #user = User.query.filter_by(name=username).first()
+    
+    #if user and user.hashed_password == hashed_password:
+        # The passwords match
+        #session['username'] = username
+        #return jsonify({'status': 'success'}), 200
+    #else:
+        # The user does not exist or password does not match
+        #return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -157,6 +215,8 @@ def login():
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
+
+
     
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -165,4 +225,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
