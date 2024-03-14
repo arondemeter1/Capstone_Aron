@@ -216,15 +216,15 @@ def add_stock():
         return jsonify({'status': 'fail', 'message': f"Error parsing stock data: {e}"}), 400
 
     try:
-        # check if the stock already exists in the user's portfolio
+        #check if the stock already exists in the user's portfolio
         existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
 
         if existing_stock:
-            # update the number of shares if the stock is already in the portfolio
+            #update the number of shares if the stock is already in the portfolio
             existing_stock.SHARES += shares
             logging.info(f"Updated existing stock {symbol}, new share count: {existing_stock.SHARES}")
         else:
-            # add a new stock entry to the portfolio
+            #add a new stock entry to the portfolio
             new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
             db.session.add(new_stock)
             logging.info(f"Added new stock {symbol} to the portfolio")
