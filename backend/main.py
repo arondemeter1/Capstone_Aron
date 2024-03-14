@@ -8,11 +8,9 @@ import math
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 import oracledb
-from models import Stock
-from models import User
-from models import db
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.pool import NullPool
+from models import db, User, Stock
 
 #configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,26 +20,41 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.secret_key = '83h9137JXHUENRyxyx(=:dfclL:)'
 
-#update the SQLALCHEMY_DATABASE_URI to use oracle+oracledb dialect
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'oracle+oracledb://ADMIN:Capstonemcsbt2024@'
-    'adb.eu-madrid-1.oraclecloud.com:1522/'
-    'g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com?ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US"'
-)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#oracle database credentials
+un = 'ADMIN'
+pw = 'Capstonemcsbt2024'
+dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
 
+
+pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
+#update the SQLALCHEMY_DATABASE_URI to use oracle+oracledb dialect
+app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
+    
+    #ADMIN:Capstonemcsbt2024@'
+    #'adb.eu-madrid-1.oraclecloud.com:1522/'
+    #'g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com?ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US"'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#here
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'creator': pool.acquire,
+    'poolclass': NullPool
+}
+app.config['SQLALCHEMY_ECHO'] = False
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
+# Initialize SQLAlchemy with the current Flask app
+#db.init_app(app)
 
 #define a simple password hashing function
 def hash_value(password):
     return hashlib.sha1(password.encode()).hexdigest()
 
-#oracle database credentials
-un = 'ADMIN'
-pw = 'Capstonemcsbt2024'
-dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))'''
 
-#create a connection pool for the Oracle database using oracledb
-pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
 
@@ -99,14 +112,14 @@ def index():
     stocks = Stock.query.all()
     
     for stock in stocks:
-        symbol = stock.symbol
+        symbol = stock.SYMBOL
         current_price = fetch_price(symbol)
         
         company_name, _ = fetch_company_name(symbol)
 
         if current_price is not None and company_name is not None:
-            shares_owned = stock.shares
-            historical_price = stock.purchase_price
+            shares_owned = stock.SHARES
+            historical_price = stock.PURCHASE_PRICE
             current_value = current_price * shares_owned
             initial_value = historical_price * shares_owned
 
@@ -164,8 +177,8 @@ def stock_detail(symbol):
     company_name, _ = fetch_company_name(symbol)
     
     # Use database information instead of hardcoded data
-    shares_owned = stock.shares
-    historical_price = stock.purchase_price
+    shares_owned = stock.SHARES
+    historical_price = stock.PURCHASE_PRICE
     current_value = shares_owned * current_price
     initial_value = shares_owned * historical_price
     roi = ((current_value - initial_value) / initial_value) * 100
@@ -216,8 +229,6 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid username or password'}), 401
 
-
-    
 @app.route('/logout', methods=['POST'])
 def logout():
     session.pop('username', None)  #remove the user from the session
