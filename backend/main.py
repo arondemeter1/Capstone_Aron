@@ -234,6 +234,29 @@ def logout():
     session.pop('username', None)  #remove the user from the session
     return jsonify({'message': 'Logged out successfully'}), 200
 
+#ADDING STOCK
+@app.route('/portfolio/add', methods=['POST'])
+def add_stock():
+    data = request.json
+    user_id = '1'
+    symbol = data['symbol'].upper()
+    shares = int(data['shares'])
+    purchase_price = float(data['purchase_price'])
+    
+    # Check if the stock already exists in the user's portfolio
+    existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
+    
+    if existing_stock:
+        # Update the number of shares if the stock is already in the portfolio
+        existing_stock.SHARES += shares
+    else:
+        # Add a new stock entry to the portfolio
+        new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
+        db.session.add(new_stock)
+    
+    db.session.commit()
+    return jsonify({'status': 'success', 'message': 'Stock added to portfolio'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
