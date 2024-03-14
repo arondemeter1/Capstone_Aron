@@ -258,5 +258,36 @@ def add_stock():
     return jsonify({'status': 'success', 'message': 'Stock added to portfolio'}), 200
 
 
+#REMOVING STOCK
+@app.route('/portfolio/remove', methods=['POST'])
+def remove_stock():
+    data = request.json
+    user_id = data['user_id']
+    symbol = data['symbol'].upper()  # Ensure symbol is uppercase
+    shares_to_remove = int(data['shares'])
+
+    # Retrieve the user's stock entry
+    stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
+
+    if not stock:
+        return jsonify({'status': 'fail', 'message': 'Stock not found in portfolio'}), 404
+
+    # Check if user has enough shares to remove
+    if stock.SHARES < shares_to_remove:
+        return jsonify({'status': 'fail', 'message': 'Not enough shares to remove'}), 400
+
+    # Update the shares count or delete the stock entry if shares_to_remove equals the current share count
+    if stock.SHARES > shares_to_remove:
+        stock.SHARES -= shares_to_remove
+        db.session.commit()
+        message = 'Shares removed successfully'
+    else:
+        db.session.delete(stock)
+        db.session.commit()
+        message = 'Stock removed completely from portfolio'
+
+    return jsonify({'status': 'success', 'message': message}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
