@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 #initialize the Flask app and CORS
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, supports_credentials=True)
 app.secret_key = '83h9137JXHUENRyxyx(=:dfclL:)'
 
 #oracle database credentials
@@ -58,12 +58,6 @@ def hash_value(password):
 ALPHA_VANTAGE_API_KEY = 'PTZRDMMS8UYGPQ7G'
 ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query?'
 
-#historical_price = the price at which the stock was purchased
-#portfolio_data = {
-#    "AAPL": {"company_name": "Apple Inc.", "shares": 10, "historical_price": 174.46},  
-#    "AMZN": {"company_name": "Amazon.com, Inc.", "shares": 5, "historical_price": 125.96},  
-#    "NVDA": {"company_name": "NVIDIA Corporation", "shares": 8, "historical_price": 446.84},  
-#}
 
 #added it back as with the oracle db it is not working
 users_database = {
@@ -262,9 +256,9 @@ def add_stock():
 @app.route('/portfolio/remove', methods=['POST'])
 def remove_stock():
     data = request.json
-    user_id = data['user_id']
+    user_id = '1'
     symbol = data['symbol'].upper()  # Ensure symbol is uppercase
-    shares_to_remove = int(data['shares'])
+    shares_to_remove = int(data['shares'])#THIS NEEDS TO BE FIXED
 
     # Retrieve the user's stock entry
     stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()

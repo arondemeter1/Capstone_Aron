@@ -18,6 +18,7 @@ function StockDetail() {
       .then(response => {
         setStockDetails(response.data);
       })
+      //NEED TO FIX THE GRAPH TIMELINE TO WESTERN WAY
       .catch(error => {
         console.error('Error fetching stock details', error);
         setError(error);
