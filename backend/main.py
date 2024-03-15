@@ -8,7 +8,6 @@ import math
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 import oracledb
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.pool import NullPool
 from models import db, User, Stock
 
