@@ -14,7 +14,7 @@ function StockDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/${symbol}`) //update with the correct backend URL
+    axios.get(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/stock/${symbol}`) //update with the correct backend URL
       .then(response => {
         setStockDetails(response.data);
       })
