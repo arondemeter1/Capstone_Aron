@@ -15,36 +15,46 @@ function PortfolioOverview() {
       .catch(error => console.error('Error fetching portfolio data', error));
   }, []);
 
-  const onModifyStock = (data, isAdding) => {
-    // Construct endpoint and validate form data
+  const onModifyStock = (formData, isAdding) => {
+    console.log("Form submission received:", formData); // Log the received form data
+  
     const endpoint = isAdding ? '/portfolio/add' : '/portfolio/remove';
-    const symbol = data.symbol;
-    const shares = parseInt(data.shares);
-    const purchase_price = parseFloat(data.purchase_price);
-
-    // Validate the form data
-    if (!symbol || isNaN(shares) || isNaN(purchase_price)) {
-      console.error('Form data is invalid:', data);
-      return; // Do not proceed with the API call
-    }
-
-    const stockData = {
-      symbol: symbol,
-      shares: shares,
-      purchase_price: purchase_price,
+    let stockData = {
+      symbol: formData.symbol.toUpperCase(),
+      shares: parseInt(formData.shares),
     };
+  
+    if (isAdding) {
+      stockData.purchase_price = parseFloat(formData.purchase_price);
+    }
+  
+    console.log("Constructed stockData object:", stockData); // Log the constructed object
+  
+    // Validating the form data
+    if (isAdding && (!stockData.symbol || isNaN(stockData.shares) || isNaN(stockData.purchase_price))) {
+      console.error('Add form data is invalid:', stockData);
+      return;
+    } else if (!isAdding && (!stockData.symbol || isNaN(stockData.shares))) {
+      console.error('Remove form data is invalid:', stockData);
+      return;
+    }
+  
+  console.log('Sending form data:', stockData);
 
-    console.log('Form data before sending:', stockData); // Log the validated and structured data
+  axios.post(`http://localhost:5000/${endpoint}`, stockData)
+    .then(response => {
+      setPortfolioData(prevState => ({
+        ...prevState,
+        ...response.data
+      })); // Merge the updated data with the current state
+      reset(); // Reset the form fields after submission
+    })
+    .catch(error => {
+      console.error('Error modifying portfolio', error);
+    });
+};
 
-    axios.post(`http://localhost:5000/${endpoint}`, stockData)
-      .then(response => {
-        setPortfolioData(response.data); // Update state with the new portfolio data
-        reset(); // reset the form fields after submission
-      })
-      .catch(error => {
-        console.error('Error modifying portfolio', error);
-      });
-  };
+
 
   if (!portfolioData) {
     return <div>Loading portfolio data...</div>;
@@ -68,16 +78,19 @@ function PortfolioOverview() {
       </div>
       <div className="portfolio-modify">
         {/* Form for adding stocks */}
-        <form onSubmit={handleSubmit(data => onModifyStock(data, true))} style={{ marginBottom: '1rem' }}>
-          <input {...register('symbol')} placeholder="Ticker Symbol" required />
-          <input {...register('shares')} placeholder="Number of Shares" type="number" required />
-          <input {...register('purchase_price')} placeholder="Purchase Price" type="number" step="0.01" required />
+        <form onSubmit={handleSubmit((data) => {
+          console.log("Form data before onModifyStock call:", data);
+          onModifyStock(data, true);
+        })}>
+          <input {...register('symbol')} name="symbol" placeholder="Ticker Symbol" required defaultValue="" />
+          <input {...register('shares', { valueAsNumber: true })} name="shares" placeholder="Number of Shares" type="number" required defaultValue={0} />
+          <input {...register('purchase_price', { valueAsNumber: true })} name="purchase_price" placeholder="Purchase Price" type="number" step="0.01" required defaultValue={0} />
           <button type="submit">Add Stock</button>
         </form>
         {/* Form for removing stocks */}
         <form onSubmit={handleSubmit(data => onModifyStock(data, false))}>
           <input {...register('symbol')} placeholder="Ticker Symbol" required />
-          <input {...register('shares')} placeholder="Number of Shares" type="number" required />
+          <input {...register('shares', { valueAsNumber: true })} placeholder="Number of Shares" type="number" required />
           <button type="submit">Remove Stock</button>
         </form>
       </div>
