@@ -10,7 +10,7 @@ const Login = ({ onLogin }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios.post('https://mcsbt-integration-arondemeter.ey.r.appspot.com/login', { username, password }, { withCredentials: true }) // Ensure to include credentials
+    axios.post('http://localhost:5000/login', { username, password }, { withCredentials: true }) // Ensure to include credentials
       .then(response => {
         if (response.data.status === 'success') {
           onLogin(); //this should update the parent component's state

@@ -8,7 +8,7 @@ function PortfolioOverview() {
   const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
-    axios.get('https://mcsbt-integration-arondemeter.ey.r.appspot.com/') // update this at deployment
+    axios.get('http://localhost:5000') // update this at deployment
       .then(response => {
         setPortfolioData(response.data);
       })
@@ -36,7 +36,7 @@ function PortfolioOverview() {
 
     console.log('Form data before sending:', stockData); // Log the validated and structured data
 
-    axios.post(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/${endpoint}`, stockData)
+    axios.post(`http://localhost:5000/${endpoint}`, stockData)
       .then(response => {
         setPortfolioData(response.data); // Update state with the new portfolio data
         reset(); // reset the form fields after submission
