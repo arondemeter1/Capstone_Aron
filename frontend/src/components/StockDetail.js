@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 
-//register the chart components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 function StockDetail() {
@@ -13,18 +12,23 @@ function StockDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    axios.get(`http://localhost:5000/stock/${symbol}`) //update with the correct backend URL
+  // Define fetchStockDetails as a callback function so it can be re-used and passed around if needed
+  const fetchStockDetails = useCallback(() => {
+    setLoading(true);
+    axios.get(`http://localhost:5000/stock/${symbol}`) // Update this at deployment
       .then(response => {
         setStockDetails(response.data);
+        setError(null); // Clear any previous errors
       })
-      //NEED TO FIX THE GRAPH TIMELINE TO WESTERN WAY
       .catch(error => {
         console.error('Error fetching stock details', error);
         setError(error);
       })
       .finally(() => setLoading(false));
-  }, [symbol]); //dependency array with symbol to refetch when it changes
+  }, [symbol]);
+
+  // Fetch details on component mount and symbol change
+  useEffect(fetchStockDetails, [fetchStockDetails]);
 
   if (loading) {
     return <div>Loading stock details...</div>;
@@ -36,7 +40,7 @@ function StockDetail() {
 
   const { company_name, total_value_owned, current_price, roi, monthly_prices } = stockDetails;
 
-  //prepare chart data for monthly prices
+  // Prepare chart data for monthly prices
   const chartData = {
     labels: monthly_prices.map(data => data.date),
     datasets: [{
@@ -70,8 +74,6 @@ function StockDetail() {
       <p>ROI: {roi.toFixed(2)}%</p>
       
       <Line data={chartData} options={chartOptions} />
-
-      {}
     </div>
   );
 }

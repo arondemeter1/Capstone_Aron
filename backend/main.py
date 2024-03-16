@@ -217,11 +217,21 @@ def add_stock():
     try:
         #check if the stock already exists in the user's portfolio
         existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
-
         if existing_stock:
-            #update the number of shares if the stock is already in the portfolio
-            existing_stock.SHARES += shares
-            logging.info(f"Updated existing stock {symbol}, new share count: {existing_stock.SHARES}")
+            # Calculate the new total number of shares
+            total_shares = existing_stock.SHARES + shares
+    
+            # Calculate the new weighted average purchase price
+            weighted_avg_price = ((existing_stock.SHARES * existing_stock.PURCHASE_PRICE) + (shares * purchase_price)) / total_shares
+    
+            # Update the stock's shares and purchase price
+            existing_stock.SHARES = total_shares
+            existing_stock.PURCHASE_PRICE = weighted_avg_price
+    
+            # Save the changes to the database
+            db.session.commit()
+            logging.info(f"Updated existing stock {symbol}, new share count: {existing_stock.SHARES}, new weighted average purchase price: {weighted_avg_price}")
+
         else:
             #add a new stock entry to the portfolio
             new_stock = Stock(USER_ID=user_id, SYMBOL=symbol, SHARES=shares, PURCHASE_PRICE=purchase_price)
