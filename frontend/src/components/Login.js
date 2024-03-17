@@ -26,26 +26,34 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div>
-      <h2>Login to see your Portfolio</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
+    <div className="login-container">
+      <div className="login-form">
+        <h2>Welcome to the Stock Tracker</h2>
+        {error && <p className="error">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="input-container">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              required
+            />
+          </div>
+          <div className="input-container">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
+          </div>
+          <div className="button-container">
+            <button type="submit">Login</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

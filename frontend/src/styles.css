@@ -1,31 +1,167 @@
+/* Existing styles */
 nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: #333;
-    color: #fff;
-  }
-  
-  .navbar-logo {
-    color: #fff;
-    text-decoration: none;
-    font-size: 24px;
-    margin-right: auto;
-  }
-  
-  .logout-button {
-    background-color: transparent;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: auto;
-  }
-  
-  .top-right-corner {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 16px;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #4a4a4a;
+  color: #fff;
+}
+
+.navbar-logo {
+  color: #fff;
+  text-decoration: none;
+  font-size: 24px;
+  margin-right: auto;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.top-right-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 16px;
+}
+
+/* Login page styles */
+.login-container {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  background: #f7f7f7;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: auto;
+}
+
+.login-form h2 {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.input-container {
+  margin-bottom: 1rem;
+}
+
+.input-container input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.button-container button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  padding: 10px;
+}
+
+/* Styles for the portfolio table */
+.table-responsive {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #4a4a4a;
+  color: #fff;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Additional styles if needed */
+
+/* Additional styles for the portfolio overview and table layout */
+.portfolio-container {
+  width: 90%; /* Table and forms will occupy 90% of the portfolio-container width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Box around the table and forms */
+.portfolio-box {
+  padding: 1rem;
+  margin-top: 1rem; /* Add space above the box */
+  background: #fff; /* White background */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.table-responsive {
+  overflow-x: auto; /* Allows horizontal scrolling for small devices */
+  margin-top: 20px; /* Spacing above the table */
+  margin-left: 10%; /* Starts from 25% of the parent container's width */
+  margin-right: 10%; /* Ends at 90% of the parent container's width */
+}
+
+table {
+  width: 100%; /* Table width fills the .table-responsive container */
+  border-collapse: collapse; /* No space between cell borders */
+  margin-bottom: 20px; /* Spacing below the table */
+}
+
+th, td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #ddd; /* Horizontal border under each row */
+}
+
+th {
+  background-color: #4a4a4a; /* Dark grey background for headers */
+  color: #fff; /* White text for headers */
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2; /* Zebra stripes for rows */
+}
+

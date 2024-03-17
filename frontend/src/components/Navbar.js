@@ -6,7 +6,7 @@ const Navbar = ({ onLogout }) => {
     <nav>
       <div>
         <Link to="/" className="navbar-logo">
-          Stock Portfolio
+          Stock Tracker
         </Link>
         <button onClick={onLogout} className="logout-button top-right-corner">
           Logout
