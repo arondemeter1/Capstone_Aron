@@ -7,7 +7,7 @@ function PortfolioOverview() {
 
   // Function to fetch portfolio data
   const fetchPortfolioData = () => {
-    axios.get('http://localhost:5000')
+    axios.get('https://mcsbt-integration-arondemeter.ey.r.appspot.com')
       .then(response => {
         setPortfolioData(response.data);
       })
@@ -31,7 +31,7 @@ function PortfolioOverview() {
     };
 
     const endpoint = isAdding ? '/portfolio/add' : '/portfolio/remove';
-    axios.post(`http://localhost:5000${endpoint}`, stockData)
+    axios.post(`https://mcsbt-integration-arondemeter.ey.r.appspot.com${endpoint}`, stockData)
       .then(() => {
         fetchPortfolioData(); // Refresh the portfolio data
       })
