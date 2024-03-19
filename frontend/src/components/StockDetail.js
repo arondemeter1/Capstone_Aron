@@ -15,7 +15,7 @@ function StockDetail() {
   // Define fetchStockDetails as a callback function so it can be re-used and passed around if needed
   const fetchStockDetails = useCallback(() => {
     setLoading(true);
-    axios.get(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/stock/${symbol}`) // Update this at deployment
+    axios.get(`http://localhost:5000/stock/${symbol}`) // Update this at deployment
       .then(response => {
         setStockDetails(response.data);
         setError(null); // Clear any previous errors
@@ -40,12 +40,15 @@ function StockDetail() {
 
   const { company_name, total_value_owned, current_price, roi, monthly_prices } = stockDetails;
 
-  // Prepare chart data for monthly prices
+  // CHANGED: Reverse the array to get the correct order for the x-axis
+  const reversedMonthlyPrices = [...monthly_prices].reverse(); // Create a new reversed array
+
+  // CHANGED: Use reversedMonthlyPrices to prepare chart data for monthly prices
   const chartData = {
-    labels: monthly_prices.map(data => data.date),
+    labels: reversedMonthlyPrices.map(data => data.date), // Use the reversed array for labels
     datasets: [{
       label: 'Monthly Closing Price',
-      data: monthly_prices.map(data => parseFloat(data.close)),
+      data: reversedMonthlyPrices.map(data => parseFloat(data.close)), // Use the reversed array for data
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
@@ -67,13 +70,29 @@ function StockDetail() {
   };
 
   return (
-    <div>
-      <h2>{company_name} - {symbol}</h2>
-      <p>Current Value: ${total_value_owned.toFixed(2)}</p>
-      <p>Current Price: ${current_price.toFixed(2)}</p>
-      <p>ROI: {roi.toFixed(2)}%</p>
-      
-      <Line data={chartData} options={chartOptions} />
+    <div className="stock-detail-layout">
+      <div className="stock-info">
+        <h2>{company_name} - {symbol}</h2>
+        <table className="stock-info-table">
+          <tbody>
+            <tr>
+              <th>Current Value:</th>
+              <td>${total_value_owned.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Current Price:</th>
+              <td>${current_price.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>ROI:</th>
+              <td>{roi.toFixed(2)}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="stock-chart">
+        <Line data={chartData} options={chartOptions} />
+      </div>
     </div>
   );
 }

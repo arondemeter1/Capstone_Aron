@@ -165,3 +165,42 @@ tr:nth-child(even) {
   background-color: #f2f2f2; /* Zebra stripes for rows */
 }
 
+/* Styles for the StockDetail layout */
+.stock-detail-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px; /* Spacing from the top of the page */
+}
+
+.stock-info {
+  flex: 1; /* Takes up 1 part of the space */
+  padding-right: 20px; /* Spacing between the table and graph */
+}
+
+.stock-chart {
+  flex: 2; /* Takes up 2 parts of the space, making it larger than stock-info */
+  max-width: 60%; /* Limits the width of the chart to 60% of the flex container */
+}
+
+/* Responsive canvas for Chart.js */
+.chartjs-render-monitor {
+  max-width: 100%;
+  max-height: 400px; /* Adjust the height as you see fit */
+}
+
+/* Additional responsive styles for smaller screens */
+@media (max-width: 768px) {
+  .stock-detail-layout {
+    flex-direction: column; /* Stack the elements on smaller screens */
+  }
+
+  .stock-info, .stock-chart {
+    width: 100%; /* Both elements take full width on smaller screens */
+    max-width: none; /* Remove max-width from .stock-chart */
+  }
+
+  .stock-info {
+    padding-bottom: 20px; /* Spacing between the info and chart on smaller screens */
+  }
+}
