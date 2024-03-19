@@ -21,8 +21,8 @@ app.secret_key = '83h9137JXHUENRyxyx(=:dfclL:)'
 
 #oracle database credentials
 un = 'ADMIN'
-pw = 'Capstonemcsbt2024'
-dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
+pw = 'free-database()119A'
+dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g2c8731f47ad2d5_freedatabase_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
 
 
 pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
