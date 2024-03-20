@@ -28,13 +28,8 @@ dsn = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(p
 pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
 #update the SQLALCHEMY_DATABASE_URI to use oracle+oracledb dialect
 app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
-    
-    #ADMIN:Capstonemcsbt2024@'
-    #'adb.eu-madrid-1.oraclecloud.com:1522/'
-    #'g2c8731f47ad2d5_qkcekul2ibiuv723_high.adb.oraclecloud.com?ssl_server_cert_dn="CN=adb.eu-madrid-1.oraclecloud.com,OU=Oracle ADB MADRID,O=Oracle Corporation,L=Redwood City,ST=California,C=US"'
-
+        
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#here
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'creator': pool.acquire,
     'poolclass': NullPool
@@ -218,17 +213,17 @@ def add_stock():
         #check if the stock already exists in the user's portfolio
         existing_stock = Stock.query.filter_by(USER_ID=user_id, SYMBOL=symbol).first()
         if existing_stock:
-            # Calculate the new total number of shares
+            #calculates the new total number of shares
             total_shares = existing_stock.SHARES + shares
     
-            # Calculate the new weighted average purchase price
+            #calculates the new weighted average purchase price
             weighted_avg_price = ((existing_stock.SHARES * existing_stock.PURCHASE_PRICE) + (shares * purchase_price)) / total_shares
     
-            # Update the stock's shares and purchase price
+            #updates the stock's shares and purchase price
             existing_stock.SHARES = total_shares
             existing_stock.PURCHASE_PRICE = weighted_avg_price
     
-            # Save the changes to the database
+            #save the changes to the database
             db.session.commit()
             logging.info(f"Updated existing stock {symbol}, new share count: {existing_stock.SHARES}, new weighted average purchase price: {weighted_avg_price}")
 

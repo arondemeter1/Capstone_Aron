@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 function PortfolioOverview() {
   const [portfolioData, setPortfolioData] = useState(null);
 
-  // Function to fetch portfolio data
+  //function to fetch portfolio data
   const fetchPortfolioData = () => {
     axios.get('https://mcsbt-integration-arondemeter.ey.r.appspot.com')
       .then(response => {
@@ -14,7 +14,7 @@ function PortfolioOverview() {
       .catch(error => console.error('Error fetching portfolio data', error));
   };
 
-  // Fetch data on component mount
+  //fetch data on component mount
   useEffect(fetchPortfolioData, []);
 
   const onModifyStock = (event, isAdding) => {
@@ -33,7 +33,7 @@ function PortfolioOverview() {
     const endpoint = isAdding ? '/portfolio/add' : '/portfolio/remove';
     axios.post(`https://mcsbt-integration-arondemeter.ey.r.appspot.com${endpoint}`, stockData)
       .then(() => {
-        fetchPortfolioData(); // Refresh the portfolio data
+        fetchPortfolioData(); //refresh the portfolio data
       })
       .catch(error => {
         console.error('Error modifying portfolio', error);
@@ -50,9 +50,9 @@ function PortfolioOverview() {
       <h2>Total Investment: ${portfolioData.total_portfolio_value.toFixed(2)}</h2>
       <h3>Total ROI: {portfolioData.portfolio_ROI.toFixed(2)}%</h3>
       
-      {/* Wrapped forms and table in a box container as per your design */}
+      {/* wrappes forms and table in a box container as per design */}
       <div className="portfolio-box">
-        {/* Forms for adding and removing stocks */}
+        {/* forms for adding and removing stocks */}
         <div className="portfolio-modify">
           <form onSubmit={(e) => onModifyStock(e, true)}>
             <input name="symbol" placeholder="Ticker Symbol" required />
@@ -67,7 +67,7 @@ function PortfolioOverview() {
           </form>
         </div>
 
-        {/* Table container for the stock details */}
+        {/* table container for the stock details */}
         <div className="table-responsive">
           <table>
             <thead>

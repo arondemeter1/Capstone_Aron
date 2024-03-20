@@ -12,7 +12,7 @@ function StockDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Define fetchStockDetails as a callback function so it can be re-used and passed around if needed
+  //define fetchStockDetails as a callback function so it can be re-used and passed around if needed
   const fetchStockDetails = useCallback(() => {
     setLoading(true);
     axios.get(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/stock/${symbol}`) // Update this at deployment
@@ -27,7 +27,7 @@ function StockDetail() {
       .finally(() => setLoading(false));
   }, [symbol]);
 
-  // Fetch details on component mount and symbol change
+  //fetch details on component mount and symbol change
   useEffect(fetchStockDetails, [fetchStockDetails]);
 
   if (loading) {
@@ -40,15 +40,13 @@ function StockDetail() {
 
   const { company_name, total_value_owned, current_price, roi, monthly_prices } = stockDetails;
 
-  // CHANGED: Reverse the array to get the correct order for the x-axis
-  const reversedMonthlyPrices = [...monthly_prices].reverse(); // Create a new reversed array
+  const reversedMonthlyPrices = [...monthly_prices].reverse();
 
-  // CHANGED: Use reversedMonthlyPrices to prepare chart data for monthly prices
   const chartData = {
-    labels: reversedMonthlyPrices.map(data => data.date), // Use the reversed array for labels
+    labels: reversedMonthlyPrices.map(data => data.date), //use the reversed array for labels
     datasets: [{
       label: 'Monthly Closing Price',
-      data: reversedMonthlyPrices.map(data => parseFloat(data.close)), // Use the reversed array for data
+      data: reversedMonthlyPrices.map(data => parseFloat(data.close)), //use the reversed array for data
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1

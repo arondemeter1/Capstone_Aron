@@ -5,8 +5,8 @@ function Logout({ onLogout }) {
   let navigate = useNavigate();
 
   const handleLogout = () => {
-    onLogout(); // This should change the authenticated state to false
-    navigate('/login'); // Redirects user to login page
+    onLogout();
+    navigate('/login'); //redirects user to login page
   };
 
   return (
