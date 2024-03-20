@@ -15,7 +15,7 @@ function StockDetail() {
   // Define fetchStockDetails as a callback function so it can be re-used and passed around if needed
   const fetchStockDetails = useCallback(() => {
     setLoading(true);
-    axios.get(`http://localhost:5000/stock/${symbol}`) // Update this at deployment
+    axios.get(`https://mcsbt-integration-arondemeter.ey.r.appspot.com/stock/${symbol}`) // Update this at deployment
       .then(response => {
         setStockDetails(response.data);
         setError(null); // Clear any previous errors
