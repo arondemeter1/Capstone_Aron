@@ -1,4 +1,3 @@
-/* Existing styles */
 nav {
   display: flex;
   justify-content: space-between;
@@ -31,7 +30,6 @@ nav {
   margin: 16px;
 }
 
-/* Login page styles */
 .login-container {
   display: grid;
   place-items: center;
@@ -92,7 +90,6 @@ nav {
   padding: 10px;
 }
 
-/* Styles for the portfolio table */
 .table-responsive {
   overflow-x: auto;
   margin: 20px 0;
@@ -119,88 +116,82 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-/* Additional styles if needed */
 
-/* Additional styles for the portfolio overview and table layout */
 .portfolio-container {
-  width: 90%; /* Table and forms will occupy 90% of the portfolio-container width */
+  width: 90%;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Box around the table and forms */
 .portfolio-box {
   padding: 1rem;
-  margin-top: 1rem; /* Add space above the box */
-  background: #fff; /* White background */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  border-radius: 4px; /* Rounded corners */
+  margin-top: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .table-responsive {
-  overflow-x: auto; /* Allows horizontal scrolling for small devices */
-  margin-top: 20px; /* Spacing above the table */
-  margin-left: 10%; /* Starts from 25% of the parent container's width */
-  margin-right: 10%; /* Ends at 90% of the parent container's width */
+  overflow-x: auto;
+  margin-top: 20px;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 
 table {
-  width: 100%; /* Table width fills the .table-responsive container */
-  border-collapse: collapse; /* No space between cell borders */
-  margin-bottom: 20px; /* Spacing below the table */
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 th, td {
   text-align: left;
   padding: 12px;
-  border-bottom: 1px solid #ddd; /* Horizontal border under each row */
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-  background-color: #4a4a4a; /* Dark grey background for headers */
-  color: #fff; /* White text for headers */
+  background-color: #4a4a4a;
+  color: #fff;
 }
 
 tr:nth-child(even) {
-  background-color: #f2f2f2; /* Zebra stripes for rows */
+  background-color: #f2f2f2;
 }
 
-/* Styles for the StockDetail layout */
 .stock-detail-layout {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-top: 20px; /* Spacing from the top of the page */
+  margin-top: 20px;
 }
 
 .stock-info {
-  flex: 1; /* Takes up 1 part of the space */
-  padding-right: 20px; /* Spacing between the table and graph */
+  flex: 1;
+  padding-right: 20px;
 }
 
 .stock-chart {
-  flex: 2; /* Takes up 2 parts of the space, making it larger than stock-info */
-  max-width: 60%; /* Limits the width of the chart to 60% of the flex container */
+  flex: 2;
+  max-width: 60%;
 }
 
-/* Responsive canvas for Chart.js */
 .chartjs-render-monitor {
   max-width: 100%;
-  max-height: 400px; /* Adjust the height as you see fit */
+  max-height: 400px;
 }
 
-/* Additional responsive styles for smaller screens */
 @media (max-width: 768px) {
   .stock-detail-layout {
-    flex-direction: column; /* Stack the elements on smaller screens */
+    flex-direction: column;
   }
 
   .stock-info, .stock-chart {
-    width: 100%; /* Both elements take full width on smaller screens */
-    max-width: none; /* Remove max-width from .stock-chart */
+    width: 100%;
+    max-width: none;
   }
 
   .stock-info {
-    padding-bottom: 20px; /* Spacing between the info and chart on smaller screens */
+    padding-bottom: 20px;
   }
 }
